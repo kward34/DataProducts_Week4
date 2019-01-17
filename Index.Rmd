@@ -1,0 +1,41 @@
+---
+title: "College Football 2016"
+author: "Kyle Ward"
+date: "January 11, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(purrr)
+library(dplyr)
+library(plotly)
+```
+
+
+```{r import, include =FALSE}
+data_path <- "2016_CSV"   # path to the data
+files <- dir(data_path, pattern = "*.csv") # get file names
+
+data_2016 <- files %>%
+  # read in all the files, appending the path before the filename
+  map(~ read_csv(file.path(data_path, .))) %>% 
+  reduce(rbind)
+```
+
+```{r create final score data frame, include=FALSE}
+data_2016$week <- as.numeric(as.character(data_2016$week))
+final_score_2016 <- filter(data_2016,type =="End of Game")
+final_score_2016 <- filter(final_score_2016,week <= 14)
+```
+
+## Final Scores by Week 
+
+```{r plot final score, echo=FALSE }
+p <- final_score_2016 %>%
+  plot_ly(x = ~week, y= ~homeScore, type = "box", name= "Home Team") %>%
+    add_boxplot(x= ~week, y= ~awayScore, type="box", name= "Away Team") %>%
+    layout(yaxis=list(title="Score"), autosize=TRUE)
+p
+```
